@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory Management</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+
+        h2, h3 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        form {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        input[type="number"] {
+            width: 100%;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        #inventory-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        #inventory-list li {
+            background: white;
+            margin-bottom: 10px;
+            padding: 15px;
+            border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        #inventory-list li:hover {
+            background-color: #f8f8f8;
+        }
+
+        /* Responsive design */
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            
+            form {
+                padding: 15px;
+            }
+            
+            #inventory-list li {
+                font-size: 14px;
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h2>Inventory Management</h2>
+    <form action="/inventory" method="POST"></form>
+    <form id="add-item-form">
+        <label for="name">Item Name:</label>
+        <input type="text" id="name" name="name" required>
+        <label for="category">Category:</label>
+        <input type="text" id="category" name="category" required>
+        <label for="quantity">Quantity:</label>
+        <input type="number" id="quantity" name="quantity" required>
+        <label for="price">Price:</label>
+        <input type="number" id="price" name="price" step="0.01" required>
+        <button type="submit">Add Item</button>
+    </form>
+
+    <h3>Inventory List</h3>
+    <ul id="inventory-list"></ul>
+
+    <script>
+        document.getElementById('add-item-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData.entries());
+
+            fetch('/add-item', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.text())
+            .then(message => {
+                alert(message);
+                loadInventory();
+            })
+            .catch(error => console.error('Error:', error));
+        });
+
+        function loadInventory() {
+            fetch('/inventory')
+                .then(response => response.json())
+                .then(items => {
+                    const inventoryList = document.getElementById('inventory-list');
+                    inventoryList.innerHTML = '';
+                    items.forEach(item => {
+                        const listItem = document.createElement('li');
+                        listItem.textContent = `${item.name} - ${item.category} - Quantity: ${item.quantity} - Price: $${item.price}`;
+                        inventoryList.appendChild(listItem);
+                    });
+                });
+        }
+
+        loadInventory();
+    </script>
+</body>
+</html>
